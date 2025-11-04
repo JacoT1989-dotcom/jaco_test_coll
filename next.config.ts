@@ -8,6 +8,18 @@ const nextConfig: NextConfig = {
     },
   },
 
+  // Configure webpack to handle Apollo Server dependencies
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Don't bundle these server-only packages
+      config.externals = config.externals || [];
+      config.externals.push({
+        '@yaacovcr/transform': '@yaacovcr/transform',
+      });
+    }
+    return config;
+  },
+
   // Ensure API routes work properly in production
   async headers() {
     return [
