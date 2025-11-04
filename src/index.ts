@@ -1,3 +1,11 @@
+import dotenv from 'dotenv';
+// Load environment variables based on NODE_ENV
+// In production, Vercel/hosting providers set env vars automatically
+// In development, load from .env.local
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: '.env.local' });
+}
+
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { typeDefs } from './schema';
