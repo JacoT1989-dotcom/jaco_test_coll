@@ -4,17 +4,19 @@
 
 **What we did:**
 ```bash
-npm install graphql apollo-server-express express axios
-npm install --save-dev @types/express @types/axios ts-node-dev
+npm install graphql @apollo/server @as-integrations/express5 express axios cors
+npm install --save-dev @types/express @types/axios @types/cors tsx
 ```
 
 **Why:**
 - `graphql` - Core library to build GraphQL APIs
-- `apollo-server-express` - GraphQL server that handles requests
+- `@apollo/server` - Apollo Server v5 (GraphQL server core)
+- `@as-integrations/express5` - Integration package for Apollo Server v5 with Express
 - `express` - Web server to run our API
 - `axios` - Makes HTTP requests to OpenMeteo API
-- `@types/express` & `@types/axios` - TypeScript type definitions
-- `ts-node-dev` - Auto-restarts server when we save code changes
+- `cors` - Enables Cross-Origin Resource Sharing for frontend access
+- `@types/express`, `@types/axios`, `@types/cors` - TypeScript type definitions
+- `tsx` - Fast TypeScript execution and auto-restart on changes
 
 ---
 
@@ -26,8 +28,9 @@ npm install --save-dev @types/express @types/axios ts-node-dev
 
 **What it does:**
 - Creates an Express web server
-- Sets up Apollo GraphQL server
-- Connects GraphQL to Express
+- Sets up Apollo GraphQL server (v5)
+- Connects GraphQL to Express using expressMiddleware
+- Configures CORS for frontend access
 - Starts listening on port 4000
 
 **Why we need it:**
@@ -37,8 +40,13 @@ This is the main file that starts our application. Without it, we have no runnin
 - `ApolloServer` - Handles GraphQL requests
 - `typeDefs` - Defines what data clients can request (schema)
 - `resolvers` - Functions that fetch the actual data
-- `server.applyMiddleware` - Connects GraphQL to Express
+- `expressMiddleware` - Connects Apollo Server v5 to Express (from `@as-integrations/express5`)
+- `express.json()` - Parses JSON request bodies
+- `cors()` - Enables CORS for frontend access
 - `app.listen(4000)` - Starts server on port 4000
+
+**Apollo Server v5 Integration:**
+Apollo Server v5 uses a separate integration package (`@as-integrations/express5`) instead of the old `apollo-server-express`. This provides better flexibility and follows Express best practices.
 
 ---
 

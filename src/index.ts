@@ -1,14 +1,14 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@as-integrations/express5';
 import cors from 'cors';
-import bodyParser from 'body-parser';
 import { typeDefs } from './schema';
 import { resolvers } from './resolvers';
 
 // Create Express app
 const app = express();
 
-// Create Apollo GraphQL server (v4)
+// Create Apollo GraphQL server (v5)
 const server = new ApolloServer({
   typeDefs,    // GraphQL schema (what data clients can request)
   resolvers,   // Functions that fetch the actual data
@@ -20,17 +20,14 @@ async function startServer() {
   await server.start();
 
   // Apply middleware
-  app.use('/graphql', cors(), bodyParser.json());
-
-  // GraphQL endpoint
-  app.post('/graphql', async (req: Request, res: Response) => {
-    const { body } = req;
-    const result = await server.executeOperation(body, {
-      contextValue: {},
-    });
-
-    res.status(200).json(result);
-  });
+  app.use(
+    '/graphql',
+    cors<cors.CorsRequest>(),
+    express.json(),
+    expressMiddleware(server, {
+      context: async () => ({}),
+    })
+  );
 
   const PORT = 4000;
 
