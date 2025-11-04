@@ -1,14 +1,9 @@
-import express from 'express';
 import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@as-integrations/express5';
-import cors from 'cors';
+import { startStandaloneServer } from '@apollo/server/standalone';
 import { typeDefs } from './schema';
 import { resolvers } from './resolvers';
 
-// Create Express app
-const app = express();
-
-// Create Apollo GraphQL server (v5)
+// Create Apollo GraphQL server
 const server = new ApolloServer({
   typeDefs,    // GraphQL schema (what data clients can request)
   resolvers,   // Functions that fetch the actual data
@@ -16,25 +11,11 @@ const server = new ApolloServer({
 
 // Start server
 async function startServer() {
-  // Start Apollo server first
-  await server.start();
-
-  // Apply middleware
-  app.use(
-    '/graphql',
-    cors<cors.CorsRequest>(),
-    express.json(),
-    expressMiddleware(server, {
-      context: async () => ({}),
-    })
-  );
-
-  const PORT = 4000;
-
-  // Start listening for requests
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}/graphql`);
+  const { url } = await startStandaloneServer(server, {
+    listen: { port: 4000 },
   });
+  
+  console.log(`🚀 Server running at ${url}`);
 }
 
 startServer();
