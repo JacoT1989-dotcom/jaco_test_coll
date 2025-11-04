@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client/react';
 import { CitySearch } from '@/components/city-search';
 import { WeatherDisplay } from '@/components/weather-display';
 import { ForecastDisplay, DailyForecast } from '@/components/forecast-display';
 import { ActivitiesDisplay } from '@/components/activities-display';
-import { GET_USER_LOCATION } from '@/lib/queries';
+import { useGeolocation } from '@/hooks/useGeolocation';
 
 interface City {
   name: string;
@@ -15,24 +14,20 @@ interface City {
   country: string;
 }
 
-interface LocationQueryData {
-  getUserLocation: City;
-}
-
 export default function Home() {
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(0);
   const [selectedForecast, setSelectedForecast] = useState<DailyForecast | null>(null);
 
-  // Fetch user's location based on IP address
-  const { data: locationData, loading: locationLoading } = useQuery<LocationQueryData>(GET_USER_LOCATION);
+  // Fetch user's location from IP address (client-side)
+  const { location, loading: locationLoading } = useGeolocation();
 
   // Set user's location as the default city on mount
   useEffect(() => {
-    if (locationData?.getUserLocation && !selectedCity) {
-      setSelectedCity(locationData.getUserLocation);
+    if (location && !selectedCity) {
+      setSelectedCity(location);
     }
-  }, [locationData, selectedCity]);
+  }, [location, selectedCity]);
 
   const handleSelectDay = (dayIndex: number, forecast: DailyForecast) => {
     setSelectedDay(dayIndex);
