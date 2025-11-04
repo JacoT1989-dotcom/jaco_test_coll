@@ -121,109 +121,141 @@ export async function rankActivities(latitude: number, longitude: number) {
 
 function scoreSkiing(weather: WeatherData) {
   let score = 0;
-  let reason = '';
+  const reasons: string[] = [];
 
   // Cold temperature is good for skiing
   if (weather.temperature < 0) {
     score += 50;
-    reason = 'Cold temperature ideal for skiing';
+    reasons.push('ideal cold temperature');
   } else if (weather.temperature < 10) {
     score += 30;
-    reason = 'Cool temperature suitable for skiing';
+    reasons.push('suitable cool temperature');
   } else {
     score += 10;
-    reason = 'Temperature too warm for skiing';
+    reasons.push('too warm');
   }
 
   // Precipitation (snow) is good
   if (weather.precipitation > 0) {
     score += 30;
+    reasons.push('precipitation present');
+  } else {
+    reasons.push('no precipitation');
   }
 
-  return { name: 'Skiing', score, reason };
+  return {
+    name: 'Skiing',
+    score,
+    reason: reasons.join(', ')
+  };
 }
 
 function scoreSurfing(weather: WeatherData) {
   let score = 0;
-  let reason = '';
+  const reasons: string[] = [];
 
   // Warm temperature is good for surfing
   if (weather.temperature > 20) {
     score += 40;
-    reason = 'Warm temperature perfect for surfing';
+    reasons.push('warm temperature');
   } else if (weather.temperature > 15) {
     score += 25;
-    reason = 'Moderate temperature for surfing';
+    reasons.push('moderate temperature');
   } else {
     score += 10;
-    reason = 'Too cold for surfing';
+    reasons.push('cold temperature');
   }
 
   // Moderate wind is good for surfing
   if (weather.windSpeed > 10 && weather.windSpeed < 30) {
     score += 40;
+    reasons.push('good wind conditions');
   } else {
     score += 10;
+    reasons.push('suboptimal wind');
   }
 
   // No heavy rain preferred
   if (weather.precipitation === 0) {
     score += 20;
+    reasons.push('no rain');
+  } else {
+    reasons.push('rainy conditions');
   }
 
-  return { name: 'Surfing', score, reason };
+  return {
+    name: 'Surfing',
+    score,
+    reason: reasons.join(', ')
+  };
 }
 
 function scoreIndoorSightseeing(weather: WeatherData) {
   let score = 50; // Baseline score (always an option)
-  let reason = 'Good indoor activity option';
+  const reasons: string[] = ['always available'];
 
   // Bad weather makes indoor activities better
   if (weather.precipitation > 5) {
     score += 30;
-    reason = 'Heavy rain - perfect for indoor activities';
+    reasons.push('heavy rain');
   } else if (weather.precipitation > 0) {
     score += 20;
-    reason = 'Light rain - good for indoor activities';
+    reasons.push('light rain');
   }
 
   // Extreme temperatures favor indoor
-  if (weather.temperature < 5 || weather.temperature > 35) {
+  if (weather.temperature < 5) {
     score += 20;
+    reasons.push('very cold outside');
+  } else if (weather.temperature > 35) {
+    score += 20;
+    reasons.push('very hot outside');
   }
 
-  return { name: 'Indoor Sightseeing', score, reason };
+  return {
+    name: 'Indoor Sightseeing',
+    score,
+    reason: reasons.join(', ')
+  };
 }
 
 function scoreOutdoorSightseeing(weather: WeatherData) {
   let score = 0;
-  let reason = '';
+  const reasons: string[] = [];
 
   // Pleasant temperature is ideal
   if (weather.temperature > 15 && weather.temperature < 25) {
     score += 50;
-    reason = 'Perfect temperature for outdoor activities';
+    reasons.push('perfect temperature');
   } else if (weather.temperature > 10 && weather.temperature < 30) {
     score += 30;
-    reason = 'Comfortable temperature for outdoor activities';
+    reasons.push('comfortable temperature');
   } else {
     score += 10;
-    reason = 'Temperature not ideal for outdoor activities';
+    reasons.push('temperature not ideal');
   }
 
   // No rain is preferred
   if (weather.precipitation === 0) {
     score += 30;
+    reasons.push('clear weather');
   } else {
     score += 5;
+    reasons.push('rainy');
   }
 
   // Light wind is good
   if (weather.windSpeed < 20) {
     score += 20;
+    reasons.push('light wind');
   } else {
     score += 5;
+    reasons.push('strong wind');
   }
 
-  return { name: 'Outdoor Sightseeing', score, reason };
+  return {
+    name: 'Outdoor Sightseeing',
+    score,
+    reason: reasons.join(', ')
+  };
 }

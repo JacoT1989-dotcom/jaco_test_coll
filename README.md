@@ -198,6 +198,79 @@ query {
 
 ---
 
+## Step 8: Setup Jest for Testing
+
+**What we did:**
+```bash
+npm install --save-dev jest @types/jest ts-jest supertest @types/supertest
+```
+
+**Why:**
+Testing ensures your API works correctly before the interview and catches bugs early.
+
+**Packages installed:**
+- `jest` - Testing framework that runs your tests
+- `@types/jest` - TypeScript definitions for Jest (autocomplete)
+- `ts-jest` - Allows Jest to understand TypeScript files
+- `supertest` - Library for testing HTTP endpoints
+- `@types/supertest` - TypeScript definitions for supertest
+
+**File created:** `jest.config.js`
+
+**What it does:**
+Configures Jest to work with TypeScript:
+- `preset: 'ts-jest'` - Use ts-jest to compile TypeScript
+- `testEnvironment: 'node'` - Run tests in Node.js (not browser)
+- `roots: ['<rootDir>/src']` - Look for tests in src folder
+- `testMatch` - Find files ending in `.test.ts` or `.spec.ts`
+
+**Test scripts added to package.json:**
+- `npm test` - Run all tests once
+- `npm run test:watch` - Run tests and watch for changes
+- `npm run test:coverage` - Run tests and show coverage report
+
+---
+
+## Step 9: Write Tests
+
+**File created:** `src/services/openMeteoService.test.ts`
+
+**What we did:**
+Created tests for all three service functions to verify they work correctly.
+
+**Tests created:**
+
+1. **searchCities test**
+   - Searches for "London"
+   - Verifies it returns an array with results
+
+2. **getWeatherForecast test**
+   - Gets weather for London coordinates
+   - Verifies response has: temperature, condition, windSpeed, precipitation
+   - Verifies values are numbers (valid data)
+
+3. **rankActivities tests** (2 tests)
+   - Test 1: Verifies it returns array with name, score, and reason
+   - Test 2: Verifies activities are sorted by score (best first)
+
+**Why these tests:**
+- Ensures API functions work before the interview
+- Catches bugs early
+- Shows you understand testing best practices
+
+**Running the tests:**
+```bash
+npm test
+```
+
+**Expected output:**
+```
+Test Suites: 1 passed
+Tests:       4 passed
+```
+
+---
+
 ## Next Steps
 
 Your GraphQL API is complete! Here's what you have:
@@ -206,6 +279,8 @@ Your GraphQL API is complete! Here's what you have:
 - ✅ Activity recommendations based on weather
 - ✅ Clean architecture with services and resolvers
 - ✅ TypeScript type safety
+- ✅ Jest testing setup
+- ✅ 4 passing tests covering all API functions
 
 **To stop the server:** Press Ctrl+C in the terminal
 
