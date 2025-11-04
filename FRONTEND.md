@@ -384,44 +384,219 @@ Container
 
 ---
 
-## Step 9: Test Frontend with Backend API
+## Step 9: Auto-Location Detection with Custom Hook
 
 **What we're doing:**
-Starting both backend and frontend servers and testing the full application
+Implementing automatic user location detection to show weather by default without searching
 
-**Commands needed:**
+**Files created:**
+- `hooks/useGeolocation.ts`
 
-**Terminal 1 - Start Backend:**
+**What it does:**
+- Custom React hook that calls IP geolocation API from the browser
+- Detects user's actual location (city, country, coordinates)
+- Returns loading state, location data, and error handling
+- Gracefully falls back to London if API fails
+- Prevents memory leaks with cleanup function
+
+**Code structure:**
+```typescript
+export function useGeolocation(): GeolocationState {
+  const [state, setState] = useState<GeolocationState>({
+    location: null,
+    loading: true,
+    error: null,
+  });
+
+  useEffect(() => {
+    // Call ipapi.co directly from browser
+    // Returns user's IP location
+    // Sets location in state
+  }, []);
+
+  return state;
+}
+```
+
+**Why client-side:**
+- Server-side IP detection gets Vercel server's IP, not user's
+- Browser-side correctly detects user's actual IP address
+- Works in all environments (localhost, production)
+
+**API used:**
+- ipapi.co (free tier, 1000 requests/day)
+- No authentication required
+- Returns: city, country, latitude, longitude
+
+**Integration in main page:**
+```typescript
+const { location, loading: locationLoading } = useGeolocation();
+
+useEffect(() => {
+  if (location && !selectedCity) {
+    setSelectedCity(location);
+  }
+}, [location, selectedCity]);
+```
+
+---
+
+## Step 10: Search Dropdown Bug Fix
+
+**What we fixed:**
+Dropdown was reopening after city selection when weather data finished loading
+
+**Files modified:**
+- `components/city-search.tsx`
+
+**Problem:**
+Original implementation used `useEffect` to automatically show dropdown when cities array changed. This caused dropdown to reopen after:
+1. User selects city
+2. Dropdown closes
+3. Weather data loads
+4. Component re-renders
+5. Dropdown reopens (unwanted!)
+
+**Solution:**
+- Check if search term includes comma (formatted selection like "New York, United States")
+- If formatted selection detected, don't show dropdown
+- Only show dropdown for active typing (no comma in search)
+- Dropdown reopens only when user starts typing again
+
+**Code change:**
+```typescript
+useEffect(() => {
+  if (cities.length > 0 && searchTerm.length >= 2 && !loading) {
+    const isFormattedSelection = searchTerm.includes(',');
+    if (!isFormattedSelection) {
+      setShowDropdown(true);
+    }
+  } else {
+    setShowDropdown(false);
+  }
+}, [cities, searchTerm, loading]);
+```
+
+**Result:**
+- Dropdown stays closed after selection
+- Better user experience
+- No extra clicks needed
+
+---
+
+## Step 11: Environment-Based Configuration
+
+**What we updated:**
+Modified Apollo Client to use environment variables for GraphQL URL
+
+**Files modified:**
+- `lib/apollo-client.tsx`
+
+**Original code:**
+```typescript
+const client = new ApolloClient({
+  link: new HttpLink({
+    uri: 'http://localhost:4000/graphql', // Hardcoded!
+  }),
+  cache: new InMemoryCache(),
+});
+```
+
+**Updated code:**
+```typescript
+const client = new ApolloClient({
+  link: new HttpLink({
+    uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:4000/graphql',
+  }),
+  cache: new InMemoryCache(),
+});
+```
+
+**Environment files:**
+- `.env.local` - Development: `NEXT_PUBLIC_GRAPHQL_URL=/api/graphql`
+- `.env.production` - Production: `NEXT_PUBLIC_GRAPHQL_URL=/api/graphql`
+
+**Why this change:**
+- Works in both development and production
+- No hardcoded URLs
+- GraphQL runs as Next.js API route (`/api/graphql`)
+- Single deployment on Vercel (no separate backend)
+
+---
+
+## Step 12: Test Frontend with Integrated Backend
+
+**What we're doing:**
+Testing the complete application with all new features
+
+**Development Command:**
+```bash
+npm run dev:frontend
+```
+This starts Next.js on http://localhost:3000 with integrated GraphQL API at `/api/graphql`
+
+**Or run full stack:**
 ```bash
 npm run dev
 ```
-This starts the GraphQL API on http://localhost:4000
-
-**Terminal 2 - Start Frontend:**
-```bash
-npm run dev
-```
-This starts Next.js on http://localhost:3000
+This starts both standalone backend (port 4000) and frontend (port 3000) concurrently
 
 **Testing checklist:**
-1. Open http://localhost:3000 in browser
-2. Type "London" in search box
-3. Wait for dropdown to appear (300ms debounce)
-4. Click "London, United Kingdom"
-5. Verify all data loads:
+1. ✅ **Auto-Location on Load**
+   - Open http://localhost:3000
+   - Should show "Detecting your location..." spinner
+   - Weather for your location displays automatically
+   - No search needed!
+
+2. ✅ **City Search**
+   - Type "London" in search box
+   - Wait for dropdown (300ms debounce)
+   - Click "London, United Kingdom"
+   - Dropdown should close and stay closed
+   - Verify dropdown doesn't reopen after data loads
+
+3. ✅ **Weather Data**
    - Current weather displays (temp, condition, wind, precipitation)
    - 7-day forecast shows 7 cards with dates and temps
    - Activity rankings show 4 activities with scores and reasons
-6. Test dark mode toggle (top right)
-7. Search for different cities (New York, Tokyo, Sydney)
-8. Check browser console for any errors
+
+4. ✅ **Dark Mode**
+   - Click theme toggle (top right)
+   - All components switch to dark theme
+   - Persistent across page reloads
+
+5. ✅ **Responsive Design**
+   - Test on mobile viewport (DevTools)
+   - Test on desktop
+   - Forecast cards should scroll on mobile
+
+6. ✅ **Error Handling**
+   - Turn off internet (or use DevTools offline mode)
+   - Should fallback to London
+   - No crashes or white screens
 
 **Expected behavior:**
+- Location detected automatically on page load
 - City search debounces after 300ms
+- Dropdown closes after selection and stays closed
 - Loading spinners show while fetching
 - All data displays correctly
 - No console errors
-- Dark mode works
-- Responsive on mobile and desktop
+- Dark mode works seamlessly
+- Fully responsive on all screen sizes
+
+---
+
+## Production Deployment
+
+**Live URL:** https://jaco-test-coll.vercel.app
+
+**Deployment process:**
+1. Push code to GitHub: `git push origin master`
+2. Vercel automatically builds and deploys
+3. GraphQL API runs as serverless function
+4. Frontend connects to `/api/graphql`
+
+**No separate backend hosting required!**
 
 ---
