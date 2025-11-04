@@ -41,10 +41,19 @@ export function CitySearch({ onSelectCity }: CitySearchProps) {
 
   const cities: City[] = useMemo(() => data?.searchCities || [], [data]);
 
-  // Show dropdown when we have results
+  // Show dropdown only when actively searching (not after selection)
   useEffect(() => {
-    setShowDropdown(cities.length > 0 && searchTerm.length >= 2);
-  }, [cities, searchTerm]);
+    // Only show if we're typing and have results
+    if (cities.length > 0 && searchTerm.length >= 2 && !loading) {
+      // Check if search term looks like a selection (includes comma)
+      const isFormattedSelection = searchTerm.includes(',');
+      if (!isFormattedSelection) {
+        setShowDropdown(true);
+      }
+    } else {
+      setShowDropdown(false);
+    }
+  }, [cities, searchTerm, loading]);
 
   const handleSelectCity = (city: City) => {
     setSearchTerm(`${city.name}, ${city.country}`);
@@ -52,12 +61,21 @@ export function CitySearch({ onSelectCity }: CitySearchProps) {
     onSelectCity(city);
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    // Show dropdown when user starts typing again
+    if (value.length >= 2) {
+      setShowDropdown(true);
+    }
+  };
+
   return (
     <div className="relative w-full max-w-md">
       <input
         type="text"
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={handleInputChange}
         placeholder="Search for a city..."
         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
@@ -78,6 +96,7 @@ export function CitySearch({ onSelectCity }: CitySearchProps) {
         <div className="absolute mt-2 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto z-10">
           {cities.map((city, index) => (
             <button
+              type="button"
               key={`${city.name}-${city.country}-${index}`}
               onClick={() => handleSelectCity(city)}
               className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
