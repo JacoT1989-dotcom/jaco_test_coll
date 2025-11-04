@@ -25,6 +25,16 @@ export const typeDefs = gql`
     reason: String!         # Why this score
   }
 
+  # DailyForecast type - represents forecast for a single day
+  type DailyForecast {
+    date: String!           # Date in YYYY-MM-DD format
+    temperatureMax: Float!  # Max temperature in Celsius
+    temperatureMin: Float!  # Min temperature in Celsius
+    windSpeed: Float!       # Max wind speed in km/h
+    precipitation: Float!   # Total precipitation in mm
+    condition: String!      # Weather condition (sunny, rainy, etc.)
+  }
+
   # Query type - defines what clients can request
   type Query {
     # Search for cities by partial name
@@ -35,5 +45,8 @@ export const typeDefs = gql`
 
     # Get ranked activities based on weather
     getActivities(latitude: Float!, longitude: Float!): [Activity!]!
+
+    # Get 7-day weather forecast
+    get7DayForecast(latitude: Float!, longitude: Float!): [DailyForecast!]!
   }
 `;

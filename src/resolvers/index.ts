@@ -1,4 +1,4 @@
-import { searchCities, getWeatherForecast, rankActivities } from '../services/openMeteoService';
+import { searchCities, getWeatherForecast, rankActivities, get7DayForecast } from '../services/openMeteoService';
 
 // Define argument types for each resolver
 interface SearchCitiesArgs {
@@ -32,6 +32,13 @@ export const resolvers = {
     // Returns: Array of Activity objects (sorted by score)
     getActivities: async (_: unknown, { latitude, longitude }: LocationArgs) => {
       return await rankActivities(latitude, longitude);
+    },
+
+    // Get 7-day weather forecast
+    // Args: { latitude: number, longitude: number }
+    // Returns: Array of DailyForecast objects
+    get7DayForecast: async (_: unknown, { latitude, longitude }: LocationArgs) => {
+      return await get7DayForecast(latitude, longitude);
     },
   },
 };

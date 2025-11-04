@@ -1,4 +1,4 @@
-import { searchCities, getWeatherForecast, rankActivities } from './openMeteoService';
+import { searchCities, getWeatherForecast, rankActivities, get7DayForecast } from './openMeteoService';
 
 describe('OpenMeteo Service', () => {
   describe('searchCities', () => {
@@ -44,6 +44,35 @@ describe('OpenMeteo Service', () => {
       for (let i = 0; i < activities.length - 1; i++) {
         expect(activities[i].score).toBeGreaterThanOrEqual(activities[i + 1].score);
       }
+    });
+  });
+
+  describe('get7DayForecast', () => {
+    it('should return 7-day forecast array', async () => {
+      // London coordinates
+      const forecast = await get7DayForecast(51.5074, -0.1278);
+
+      expect(Array.isArray(forecast)).toBe(true);
+      expect(forecast.length).toBe(7);
+      expect(forecast[0]).toHaveProperty('date');
+      expect(forecast[0]).toHaveProperty('temperatureMax');
+      expect(forecast[0]).toHaveProperty('temperatureMin');
+      expect(forecast[0]).toHaveProperty('windSpeed');
+      expect(forecast[0]).toHaveProperty('precipitation');
+      expect(forecast[0]).toHaveProperty('condition');
+    });
+
+    it('should return valid forecast data types', async () => {
+      const forecast = await get7DayForecast(51.5074, -0.1278);
+
+      forecast.forEach((day) => {
+        expect(typeof day.date).toBe('string');
+        expect(typeof day.temperatureMax).toBe('number');
+        expect(typeof day.temperatureMin).toBe('number');
+        expect(typeof day.windSpeed).toBe('number');
+        expect(typeof day.precipitation).toBe('number');
+        expect(typeof day.condition).toBe('string');
+      });
     });
   });
 });

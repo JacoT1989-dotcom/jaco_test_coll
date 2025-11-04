@@ -24,11 +24,30 @@ interface WeatherResponse {
   };
 }
 
+interface ForecastResponse {
+  daily: {
+    time: string[];
+    temperature_2m_max: number[];
+    temperature_2m_min: number[];
+    wind_speed_10m_max: number[];
+    precipitation_sum: number[];
+  };
+}
+
 interface WeatherData {
   temperature: number;
   condition: string;
   windSpeed: number;
   precipitation: number;
+}
+
+interface DailyForecast {
+  date: string;
+  temperatureMax: number;
+  temperatureMin: number;
+  windSpeed: number;
+  precipitation: number;
+  condition: string;
 }
 
 // Search for cities by name
@@ -258,4 +277,45 @@ function scoreOutdoorSightseeing(weather: WeatherData) {
     score,
     reason: reasons.join(', ')
   };
+}
+
+// Get 7-day weather forecast for a location
+// Returns array of daily forecasts
+export async function get7DayForecast(latitude: number, longitude: number) {
+  try {
+    const response = await axios.get<ForecastResponse>(WEATHER_API, {
+      params: {
+        latitude,
+        longitude,
+        daily: 'temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum',
+        timezone: 'auto',
+        forecast_days: 7,
+      },
+    });
+
+    const daily = response.data.daily;
+
+    // Map API response to our DailyForecast type
+    return daily.time.map((date, index) => {
+      const precipitation = daily.precipitation_sum[index];
+
+      // Determine weather condition based on precipitation
+      let condition = 'Sunny';
+      if (precipitation > 0) {
+        condition = 'Rainy';
+      }
+
+      return {
+        date,
+        temperatureMax: daily.temperature_2m_max[index],
+        temperatureMin: daily.temperature_2m_min[index],
+        windSpeed: daily.wind_speed_10m_max[index],
+        precipitation,
+        condition,
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching 7-day forecast:', error);
+    throw new Error('Failed to fetch 7-day forecast');
+  }
 }
