@@ -2,10 +2,12 @@
 
 import { useQuery } from '@apollo/client/react';
 import { GET_WEATHER } from '@/lib/queries';
+import { DailyForecast } from './forecast-display';
 
 interface WeatherDisplayProps {
   latitude: number;
   longitude: number;
+  forecastData?: DailyForecast | null;
 }
 
 interface Weather {
@@ -19,9 +21,10 @@ interface GetWeatherData {
   getWeather: Weather;
 }
 
-export function WeatherDisplay({ latitude, longitude }: WeatherDisplayProps) {
+export function WeatherDisplay({ latitude, longitude, forecastData }: WeatherDisplayProps) {
   const { data, loading, error } = useQuery<GetWeatherData>(GET_WEATHER, {
     variables: { latitude, longitude },
+    skip: !!forecastData, // Skip if we have forecast data
   });
 
   if (loading) {
@@ -49,7 +52,13 @@ export function WeatherDisplay({ latitude, longitude }: WeatherDisplayProps) {
     );
   }
 
-  const weather = data?.getWeather;
+  // Use forecast data if available, otherwise use current weather
+  const weather = forecastData ? {
+    temperature: (forecastData.temperatureMax + forecastData.temperatureMin) / 2,
+    condition: forecastData.condition,
+    windSpeed: forecastData.windSpeed,
+    precipitation: forecastData.precipitation,
+  } : data?.getWeather;
 
   if (!weather) {
     return null;
@@ -57,10 +66,27 @@ export function WeatherDisplay({ latitude, longitude }: WeatherDisplayProps) {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+      {forecastData && (
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+          {new Date(forecastData.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+        </h3>
+      )}
+      
       <div className="mb-4">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-          {weather.temperature.toFixed(1)}°C
-        </h2>
+        {forecastData ? (
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              {forecastData.temperatureMax.toFixed(1)}°C / {forecastData.temperatureMin.toFixed(1)}°C
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              High / Low
+            </p>
+          </div>
+        ) : (
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            {weather.temperature.toFixed(1)}°C
+          </h2>
+        )}
       </div>
 
       <div className="mb-4">

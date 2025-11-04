@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { CitySearch } from '@/components/city-search';
 import { WeatherDisplay } from '@/components/weather-display';
-import { ForecastDisplay } from '@/components/forecast-display';
+import { ForecastDisplay, DailyForecast } from '@/components/forecast-display';
 import { ActivitiesDisplay } from '@/components/activities-display';
 
 interface City {
@@ -15,6 +15,13 @@ interface City {
 
 export default function Home() {
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
+  const [selectedDay, setSelectedDay] = useState<number>(0);
+  const [selectedForecast, setSelectedForecast] = useState<DailyForecast | null>(null);
+
+  const handleSelectDay = (dayIndex: number, forecast: DailyForecast) => {
+    setSelectedDay(dayIndex);
+    setSelectedForecast(forecast);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -38,18 +45,22 @@ export default function Home() {
             <WeatherDisplay
               latitude={selectedCity.latitude}
               longitude={selectedCity.longitude}
+              forecastData={selectedForecast}
             />
 
             {/* 7-Day Forecast */}
             <ForecastDisplay
               latitude={selectedCity.latitude}
               longitude={selectedCity.longitude}
+              selectedDay={selectedDay}
+              onSelectDay={handleSelectDay}
             />
 
             {/* Activity Rankings */}
             <ActivitiesDisplay
               latitude={selectedCity.latitude}
               longitude={selectedCity.longitude}
+              forecastData={selectedForecast}
             />
           </>
         ) : (
