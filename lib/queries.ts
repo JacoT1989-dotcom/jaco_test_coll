@@ -44,3 +44,14 @@ export const GET_ACTIVITIES = gql`
     }
   }
 `;
+
+export const GET_USER_LOCATION = gql`
+  query GetUserLocation {
+    getUserLocation {
+      name
+      latitude
+      longitude
+      country
+    }
+  }
+`;

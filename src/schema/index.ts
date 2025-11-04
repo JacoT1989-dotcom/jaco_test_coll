@@ -48,5 +48,8 @@ export const typeDefs = gql`
 
     # Get 7-day weather forecast
     get7DayForecast(latitude: Float!, longitude: Float!): [DailyForecast!]!
+
+    # Get user's location based on IP address
+    getUserLocation: City!
   }
 `;

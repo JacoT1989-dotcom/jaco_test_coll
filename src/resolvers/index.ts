@@ -1,4 +1,5 @@
 import { searchCities, getWeatherForecast, rankActivities, get7DayForecast } from '../services/openMeteoService';
+import { getUserLocationFromIP } from '../services/ipGeolocationService';
 
 // Define argument types for each resolver
 interface SearchCitiesArgs {
@@ -39,6 +40,13 @@ export const resolvers = {
     // Returns: Array of DailyForecast objects
     get7DayForecast: async (_: unknown, { latitude, longitude }: LocationArgs) => {
       return await get7DayForecast(latitude, longitude);
+    },
+
+    // Get user's location based on IP address
+    // No args - automatically detects location
+    // Returns: City object with user's current location
+    getUserLocation: async () => {
+      return await getUserLocationFromIP();
     },
   },
 };
