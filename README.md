@@ -276,16 +276,133 @@ Tests:       4 passed
 
 ---
 
+---
+
+## Step 10: Production Deployment Setup
+
+**What we did:**
+Configured the application for production deployment on Vercel with integrated GraphQL backend.
+
+### Changes Made:
+
+**1. Integrated GraphQL into Next.js**
+   - Created API route at `app/api/graphql/route.ts`
+   - GraphQL server now runs as serverless function
+   - No separate backend hosting required
+
+**2. Environment-based Configuration**
+   - Updated `lib/apollo-client.tsx` to use environment variables
+   - Created `.env.local` and `.env.production` files
+   - Frontend connects to `/api/graphql` in all environments
+
+**3. Build Script Updates**
+   - `npm run build` - Builds Next.js only (for Vercel)
+   - `npm run start` - Starts Next.js with integrated API
+   - `npm run dev:frontend` - Development mode for frontend only
+   - `npm run dev` - Runs both backend and frontend concurrently (local development)
+
+**4. Webpack Configuration**
+   - Added polyfill for Apollo Server optional dependencies
+   - Configured CORS headers for API routes
+   - Fixed compatibility issues with Vercel serverless environment
+
+### Deployment on Vercel:
+
+**Environment Variables:**
+Set in Vercel dashboard (Settings → Environment Variables):
+- `NEXT_PUBLIC_GRAPHQL_URL=/api/graphql`
+
+**Deploy Command:**
+```bash
+git push origin master
+```
+Vercel automatically builds and deploys on every push.
+
+**Live URL:** https://jaco-test-coll.vercel.app
+
+---
+
+## Step 11: Auto-Location Detection
+
+**What we did:**
+Added automatic user location detection based on IP address to show local weather by default.
+
+### Implementation:
+
+**1. IP Geolocation Service**
+   - Created `src/services/ipGeolocationService.ts`
+   - Uses ipapi.co free API (1000 requests/day, no key required)
+   - Fallback to London if geolocation fails
+
+**2. GraphQL Schema Update**
+   - Added `getUserLocation` query
+   - Returns `City` type with user's detected location
+
+**3. Frontend Auto-Load**
+   - App automatically fetches user location on mount
+   - Shows loading spinner while detecting
+   - Displays weather for detected location
+   - User can still search for other cities
+
+### Known Issue - Geolocation Not Working:
+
+**Problem:** IP geolocation may not work correctly when:
+- Running on localhost (returns server location, not user's)
+- Behind VPN or proxy
+- In serverless environment (gets Vercel server IP, not user's)
+
+**Why it happens:**
+The IP geolocation service runs on the **server-side** (GraphQL resolver), so it detects the server's IP, not the user's browser IP.
+
+**Solution Options:**
+
+1. **Use Browser Geolocation API (Recommended):**
+   ```typescript
+   // In the frontend component
+   navigator.geolocation.getCurrentPosition((position) => {
+     const { latitude, longitude } = position.coords;
+     // Use these coordinates
+   });
+   ```
+   - More accurate
+   - Gets actual user location
+   - Requires user permission
+
+2. **Client-Side IP Geolocation:**
+   - Call IP API directly from browser
+   - Fetch from `/api/geolocation` that forwards request
+   - Include user's IP in request headers
+
+3. **Use Vercel Edge Functions:**
+   - Access user's IP via `request.headers.get('x-forwarded-for')`
+   - Pass IP to geolocation service
+
+**Current Implementation Note:**
+The auto-location feature is implemented but may show incorrect location because it detects server IP instead of user IP. You can still search for any city manually.
+
+---
+
 ## Next Steps
 
-Your GraphQL API is complete! Here's what you have:
+Your GraphQL API is complete and deployed! Here's what you have:
 - ✅ City search functionality
 - ✅ Weather forecasts
+- ✅ 7-day weather forecast
 - ✅ Activity recommendations based on weather
+- ✅ Auto-location detection (needs client-side fix)
 - ✅ Clean architecture with services and resolvers
 - ✅ TypeScript type safety
 - ✅ Jest testing setup
-- ✅ 4 passing tests covering all API functions
+- ✅ Next.js frontend with Apollo Client
+- ✅ Dark mode support
+- ✅ Deployed on Vercel with serverless GraphQL
 
 **To stop the server:** Press Ctrl+C in the terminal
+
+**Development URLs:**
+- Frontend: http://localhost:3000
+- GraphQL Playground: http://localhost:4000/graphql (standalone mode)
+- Next.js API: http://localhost:3000/api/graphql (integrated mode)
+
+**Production URL:** https://jaco-test-coll.vercel.app
 
