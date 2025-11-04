@@ -1,4 +1,9 @@
 import type { NextConfig } from "next";
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const nextConfig: NextConfig = {
   // Enable experimental features for better API route handling
@@ -8,14 +13,13 @@ const nextConfig: NextConfig = {
     },
   },
 
-  // Configure webpack to handle Apollo Server dependencies
+  // Configure webpack to handle Apollo Server optional dependencies
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Don't bundle these server-only packages
-      config.externals = config.externals || [];
-      config.externals.push({
-        '@yaacovcr/transform': '@yaacovcr/transform',
-      });
+      // Polyfill optional dependencies that aren't needed
+      config.resolve = config.resolve || {};
+      config.resolve.alias = config.resolve.alias || {};
+      config.resolve.alias['@yaacovcr/transform'] = path.resolve(__dirname, 'lib/transform-polyfill.js');
     }
     return config;
   },
