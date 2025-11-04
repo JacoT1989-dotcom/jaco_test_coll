@@ -281,7 +281,7 @@ function scoreOutdoorSightseeing(weather: WeatherData) {
 
 // Get 7-day weather forecast for a location
 // Returns array of daily forecasts
-export async function get7DayForecast(latitude: number, longitude: number) {
+export async function get7DayForecast(latitude: number, longitude: number): Promise<DailyForecast[]> {
   try {
     const response = await axios.get<ForecastResponse>(WEATHER_API, {
       params: {
