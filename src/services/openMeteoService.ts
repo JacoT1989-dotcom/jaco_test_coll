@@ -1,8 +1,17 @@
 import axios from 'axios';
 
-// OpenMeteo API base URLs
-const GEOCODING_API = 'https://geocoding-api.open-meteo.com/v1/search';
-const WEATHER_API = 'https://api.open-meteo.com/v1/forecast';
+// OpenMeteo API base URLs from environment variables
+// Validate that required environment variables are set
+if (!process.env.NEXT_PUBLIC_GEOCODING_API) {
+  throw new Error('NEXT_PUBLIC_GEOCODING_API environment variable is not set');
+}
+
+if (!process.env.NEXT_PUBLIC_WEATHER_API) {
+  throw new Error('NEXT_PUBLIC_WEATHER_API environment variable is not set');
+}
+
+const GEOCODING_API: string = process.env.NEXT_PUBLIC_GEOCODING_API;
+const WEATHER_API: string = process.env.NEXT_PUBLIC_WEATHER_API;
 
 // TypeScript interfaces for API responses and weather data
 interface CityResult {
