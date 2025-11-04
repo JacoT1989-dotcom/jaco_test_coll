@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.typeDefs = void 0;
-const apollo_server_express_1 = require("apollo-server-express");
+const graphql_tag_1 = require("graphql-tag");
 // GraphQL Schema - Defines what data clients can request
-exports.typeDefs = (0, apollo_server_express_1.gql) `
+exports.typeDefs = (0, graphql_tag_1.gql) `
   # City type - represents a city location
   type City {
     name: String!           # City name (! means required)

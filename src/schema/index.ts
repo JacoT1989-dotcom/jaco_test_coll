@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server-express';
+import { gql } from 'graphql-tag';
 
 // GraphQL Schema - Defines what data clients can request
 export const typeDefs = gql`
