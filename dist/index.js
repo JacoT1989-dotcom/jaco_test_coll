@@ -20,7 +20,7 @@ async function startServer() {
     // Start Apollo server first
     await server.start();
     // Connect Apollo to Express
-    // Type assertion needed due to Express v5 compatibility with Apollo Server v3
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     server.applyMiddleware({ app: app });
     const PORT = 4000;
     // Start listening for requests

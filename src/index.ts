@@ -1,10 +1,10 @@
-import express, { Express } from 'express';
+import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { typeDefs } from './schema';
 import { resolvers } from './resolvers';
 
 // Create Express app
-const app: Express = express();
+const app = express();
 
 // Create Apollo GraphQL server
 const server = new ApolloServer({
@@ -18,8 +18,8 @@ async function startServer() {
   await server.start();
 
   // Connect Apollo to Express
-  // Type assertion needed due to Express v5 compatibility with Apollo Server v3
-  server.applyMiddleware({ app: app as unknown as Parameters<typeof server.applyMiddleware>[0]['app'] });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  server.applyMiddleware({ app: app as any });
 
   const PORT = 4000;
 
