@@ -125,18 +125,24 @@ function scoreOutdoorSightseeing(weather: WeatherData): Activity {
     reasons.push('temperature not ideal');
   }
 
+  // No rain is preferred - rain significantly reduces outdoor appeal
   if (weather.precipitation === 0) {
     score += 30;
     reasons.push('clear weather');
-  } else {
+  } else if (weather.precipitation < 2) {
     score += 5;
+    reasons.push('light rain');
+  } else {
+    // No points for moderate/heavy rain
     reasons.push('rainy');
   }
 
+  // Light wind is good
   if (weather.windSpeed < 20) {
     score += 20;
     reasons.push('calm winds');
   } else {
+    // No points for strong wind
     reasons.push('windy');
   }
 
@@ -207,9 +213,12 @@ export function ActivitiesDisplay({ latitude, longitude, forecastData }: Activit
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+      <h3 className="text-lg font-semibold mb-1 text-gray-900 dark:text-gray-100">
         Activity Rankings {forecastData && `- ${new Date(forecastData.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`}
       </h3>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        Sorted from highest to lowest percentage
+      </p>
       <div className="space-y-4">
         {activities.map((activity, index) => (
           <div

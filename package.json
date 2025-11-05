@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "tsx watch src/index.ts",
+    "dev:backend": "tsx watch --env-file=.env.local src/index.ts",
     "dev:frontend": "next dev",
     "build": "next build",
     "build:standalone": "next build && tsc -p tsconfig.api.json",

@@ -1,17 +1,16 @@
 import axios from 'axios';
 
 // OpenMeteo API base URLs from environment variables
-// Validate that required environment variables are set
-if (!process.env.NEXT_PUBLIC_GEOCODING_API) {
-  throw new Error('NEXT_PUBLIC_GEOCODING_API environment variable is not set');
-}
+// Support both NEXT_PUBLIC_ prefixed (for Next.js) and non-prefixed (for backend) variables
+const GEOCODING_API: string =
+  process.env.NEXT_PUBLIC_GEOCODING_API ||
+  process.env.GEOCODING_API ||
+  'https://geocoding-api.open-meteo.com/v1/search';
 
-if (!process.env.NEXT_PUBLIC_WEATHER_API) {
-  throw new Error('NEXT_PUBLIC_WEATHER_API environment variable is not set');
-}
-
-const GEOCODING_API: string = process.env.NEXT_PUBLIC_GEOCODING_API;
-const WEATHER_API: string = process.env.NEXT_PUBLIC_WEATHER_API;
+const WEATHER_API: string =
+  process.env.NEXT_PUBLIC_WEATHER_API ||
+  process.env.WEATHER_API ||
+  'https://api.open-meteo.com/v1/forecast';
 
 // TypeScript interfaces for API responses and weather data
 interface CityResult {
@@ -263,22 +262,25 @@ function scoreOutdoorSightseeing(weather: WeatherData) {
     reasons.push('temperature not ideal');
   }
 
-  // No rain is preferred
+  // No rain is preferred - rain significantly reduces outdoor appeal
   if (weather.precipitation === 0) {
     score += 30;
     reasons.push('clear weather');
-  } else {
+  } else if (weather.precipitation < 2) {
     score += 5;
+    reasons.push('light rain');
+  } else {
+    // No points for moderate/heavy rain
     reasons.push('rainy');
   }
 
   // Light wind is good
   if (weather.windSpeed < 20) {
     score += 20;
-    reasons.push('light wind');
+    reasons.push('calm winds');
   } else {
-    score += 5;
-    reasons.push('strong wind');
+    // No points for strong wind
+    reasons.push('windy');
   }
 
   return {
