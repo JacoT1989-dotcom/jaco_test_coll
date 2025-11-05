@@ -114,35 +114,55 @@ function scoreOutdoorSightseeing(weather: WeatherData): Activity {
   let score = 0;
   const reasons: string[] = [];
 
+  // Check for rain first - it's a deal-breaker for outdoor activities
+  const hasRain = weather.precipitation >= 2;
+  const hasLightRain = weather.precipitation > 0 && weather.precipitation < 2;
+  const isWindy = weather.windSpeed >= 20;
+
+  // Temperature scoring - but only give good scores if weather is actually nice
   if (weather.temperature > 15 && weather.temperature < 25) {
-    score += 50;
-    reasons.push('perfect temperature');
+    if (!hasRain && !isWindy) {
+      score += 50;
+      reasons.push('ideal temperature');
+    } else {
+      score += 15;
+      reasons.push('decent temperature');
+    }
   } else if (weather.temperature > 10 && weather.temperature < 30) {
-    score += 30;
-    reasons.push('comfortable temperature');
+    if (!hasRain && !isWindy) {
+      score += 30;
+      reasons.push('good temperature');
+    } else {
+      score += 10;
+      reasons.push('acceptable temperature');
+    }
+  } else if (weather.temperature <= 10) {
+    score += 5;
+    reasons.push('cold');
   } else {
-    score += 10;
-    reasons.push('temperature not ideal');
+    score += 5;
+    reasons.push('hot');
   }
 
-  // No rain is preferred - rain significantly reduces outdoor appeal
+  // Rain check
   if (weather.precipitation === 0) {
     score += 30;
-    reasons.push('clear weather');
-  } else if (weather.precipitation < 2) {
+    reasons.push('dry');
+  } else if (hasLightRain) {
     score += 5;
-    reasons.push('light rain');
+    reasons.push('drizzling');
   } else {
-    // No points for moderate/heavy rain
-    reasons.push('rainy');
+    reasons.push('raining');
   }
 
-  // Light wind is good
-  if (weather.windSpeed < 20) {
+  // Wind check
+  if (weather.windSpeed < 10) {
     score += 20;
-    reasons.push('calm winds');
+    reasons.push('calm');
+  } else if (weather.windSpeed < 20) {
+    score += 10;
+    reasons.push('breezy');
   } else {
-    // No points for strong wind
     reasons.push('windy');
   }
 
